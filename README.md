@@ -1,17 +1,17 @@
-# Kalkulator Cetak
+<!-- # Kalkulator Cetak
 
-Aplikasi web internal untuk menghitung harga penawaran cetak buku. Django 5 + SQLite + Bootstrap 5, tanpa SPA framework. Semua perhitungan ada di satu fungsi murni `kalkulator/services/pricing.py::hitung()`.
+Aplikasi web internal untuk menghitung harga penawaran cetak buku. Django 5 + SQLite + Bootstrap 5, tanpa SPA framework. Semua perhitungan ada di satu fungsi murni `kalkulator/services/pricing.py::hitung()`. -->
 
 ## Setup
 
-1. Pastikan Python 3.11+ terpasang. Tidak perlu MySQL/Laragon.
+1. Pastikan Python 3.11+ terpasang. 
 2. (Opsional) Buat `.env` untuk mengganti default:
 
    ```
-   DJANGO_SECRET_KEY=...
-   DJANGO_DEBUG=1
+   DJANGO_SECRET_KEY=
+   DJANGO_DEBUG=
    DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
-   DB_PATH=calculator-cetak.sqlite3
+   DB_PATH=
    ```
 
    Tanpa `.env`, nilai default di `config/settings.py` dipakai. File database SQLite dibuat otomatis oleh `migrate`.
@@ -37,7 +37,7 @@ Aplikasi web internal untuk menghitung harga penawaran cetak buku. Django 5 + SQ
    python manage.py runserver
    ```
 
-## Halaman
+<!-- ## Halaman
 
 | URL | Fungsi |
 |---|---|
@@ -92,7 +92,7 @@ kalkulator/
 - Satu rim selalu 500 lembar (konstanta `RIM` di `services/pricing.py`), tidak diinput dari form.
 - Harga unit dibulatkan hanya saat ditampilkan (2 desimal) atau sesuai opsi pembulatan `none`/`up_100`/`up_500`/`up_1000`.
 - Setiap penawaran menyimpan `input_snapshot` dan `hasil_snapshot` (JSON), jadi perubahan tarif tidak mengubah penawaran lama.
-- Nomor penawaran: `RP-YYYYMMDD-####` (sequence harian).
+- Nomor penawaran: `RP-YYYYMMDD-####` (sequence harian). -->
 
 ## Test
 
@@ -100,7 +100,7 @@ kalkulator/
 python manage.py test kalkulator
 ```
 
-Golden test memakai seluruh default §5 dan harus menghasilkan `subtotal = 22.877.523,75`, `total = 29.740.780,875`, `harga_unit = 14.870,3904375`.
+<!-- Golden test memakai seluruh default §5 dan harus menghasilkan `subtotal = 22.877.523,75`, `total = 29.740.780,875`, `harga_unit = 14.870,3904375`.
 
 ## Asumsi — menunggu konfirmasi pemilik
 
@@ -115,4 +115,4 @@ Rumus mengikuti dokumen/Excel apa adanya. Label berikut belum dikonfirmasi:
 7. Apakah diskon Rp2.000.000 bersifat tetap atau per penawaran.
 8. Apakah `DOFF/GLOSSY` dan `SPOT UV/EMBOS/POLY` perlu biaya — belum ada rumusnya, jadi belum dihitung.
 
-Catatan: pada Excel, wrapping memakai tebal bending (`D23`). Aplikasi memakai `wrapping_tebal` (`D24`) dengan default 1, sehingga hasil default identik tetapi logikanya benar.
+Catatan: pada Excel, wrapping memakai tebal bending (`D23`). Aplikasi memakai `wrapping_tebal` (`D24`) dengan default 1, sehingga hasil default identik tetapi logikanya benar. -->
