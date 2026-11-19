@@ -1,0 +1,351 @@
+{% extends "kalkulator/base.html" %}
+{% block title %}{% if edit %}Ubah Ongkos Cetak{% else %}Hitung Ongkos Cetak{% endif %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="crumbs">
+      <a href="{% url 'kalkulator:ongkos_list' %}">Ongkos Cetak</a>
+      <span aria-hidden="true">/</span>
+      <span class="here">{% if edit %}{{ edit.nomor }}{% else %}Hitung Baru{% endif %}</span>
+    </div>
+    <h1 class="title">{% if edit %}Ubah Ongkos Cetak{% else %}Hitung Ongkos Cetak{% endif %}</h1>
+    <div class="d-flex flex-wrap gap-2 mt-2">
+      {% if edit %}<span class="badge text-bg-dark">{{ edit.nomor }}</span>{% endif %}
+      <span class="badge text-bg-light">Tanpa biaya kertas</span>
+    </div>
+  </div>
+  <div class="page-actions no-print">
+    <a class="btn-quiet d-xl-none" href="#ringkasan">Lihat Hasil</a>
+    <button class="btn-brand" type="submit" form="form-ongkos">
+      {% if edit %}Simpan Perubahan{% else %}Hitung &amp; Simpan{% endif %}
+    </button>
+  </div>
+</div>
+
+{% if errors %}
+  <div class="alert alert-danger py-2">Periksa field yang ditandai merah.</div>
+{% endif %}
+
+<form method="post" action="{% if form_action %}{{ form_action }}{% else %}{% url 'kalkulator:ongkos_baru' %}{% endif %}" id="form-ongkos" novalidate>
+  {% csrf_token %}
+  <div class="row g-4 align-items-start">
+    <div class="col-xl-8">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Data pekerjaan</h2>
+          <p>Pelanggan dan judul untuk dokumen penawaran.</p>
+        </div>
+        <div class="panel-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="pelanggan">Pelanggan</label>
+              <input class="form-control" id="pelanggan" name="pelanggan" value="{{ request.POST.pelanggan|default:pelanggan }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="telepon">Nomor Telepon Pelanggan</label>
+              <input class="form-control" id="telepon" name="telepon" value="{{ request.POST.telepon|default:telepon }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="judul_buku">Judul Pekerjaan</label>
+              <input class="form-control" id="judul_buku" name="judul_buku" value="{{ request.POST.judul_buku|default:judul_buku }}">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Biaya cetak</h2>
+          <p>Kertas dan bahan tidak dihitung pada mode ini.</p>
+        </div>
+        <div class="tabs nav" role="tablist" aria-label="Bagian ongkos cetak">
+          {% for group in groups %}
+            <button class="nav-link {% if forloop.first %}active{% endif %}" id="tab-{{ group.key }}"
+                    data-bs-toggle="tab" data-bs-target="#g-{{ group.key }}" type="button" role="tab"
+                    aria-controls="g-{{ group.key }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+              {{ group.label }}
+            </button>
+          {% endfor %}
+        </div>
+        <div class="panel-body tab-content">
+          {% for group in groups %}
+            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="g-{{ group.key }}" role="tabpanel" aria-labelledby="tab-{{ group.key }}">
+              <div class="row g-3">
+                {% for f in group.fields %}
+                  <div class="col-md-6">
+                    <label class="form-label" for="id_{{ f.key }}">{{ f.label }}</label>
+                    {% if f.choices %}
+                      <select class="form-select{% if f.error %} is-invalid{% endif %}" id="id_{{ f.key }}" name="{{ f.key }}">
+                        {% for value, label in f.choices %}
+                          <option value="{{ value }}" {% if value == f.value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                      </select>
+                    {% elif f.suggestions %}
+                      <div class="input-group">
+                        <input class="form-control{% if f.kind != 'text' %} num{% endif %}{% if f.error %} is-invalid{% endif %}"
+                               id="id_{{ f.key }}" name="{{ f.key }}" value="{{ f.value }}"
+                               type="{% if f.kind == 'text' %}text{% else %}number{% endif %}"
+                               {% if f.kind != 'text' %}inputmode="decimal" min="0" step="{% if f.kind == 'int' %}1{% else %}any{% endif %}"{% endif %}
+                               list="sug-{{ f.key }}">
+                        {% if f.unit != '-' %}<span class="input-group-text">{{ f.unit }}</span>{% endif %}
+                      </div>
+                      <datalist id="sug-{{ f.key }}">
+                        {% for option in f.suggestions %}<option value="{{ option }}">{% endfor %}
+                      </datalist>
+                    {% else %}
+                      <div class="input-group">
+                        <input class="form-control num{% if f.error %} is-invalid{% endif %}"
+                               id="id_{{ f.key }}" name="{{ f.key }}" value="{{ f.value }}"
+                               type="number" inputmode="decimal" min="0"
+                               step="{% if f.kind == 'int' %}1{% else %}any{% endif %}">
+                        {% if f.unit != '-' %}<span class="input-group-text">{{ f.unit }}</span>{% endif %}
+                      </div>
+                    {% endif %}
+                    {% if f.error %}<div class="text-danger small">{{ f.error }}</div>{% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+
+              {% if group.key == 'plat' %}
+                <div class="d-flex flex-wrap align-items-center gap-2 mt-4 mb-2">
+                  <h3 class="h6 mb-0">Komponen plat</h3>
+                  <button type="button" class="btn btn-sm btn-quiet ms-auto" id="tambah-plat">Tambah Komponen</button>
+                </div>
+                <div id="plat-rows">
+                  {% for row in plat_rows %}
+                    {% include "kalkulator/_plat_row.html" with row=row %}
+                  {% endfor %}
+                </div>
+                <datalist id="sug-unit_plat">
+                  {% for option in unit_plat_suggestions %}<option value="{{ option }}">{% endfor %}
+                </datalist>
+              {% elif group.key == 'finishing' %}
+                <div class="d-flex flex-wrap align-items-center gap-2 mt-4 mb-2">
+                  <h3 class="h6 mb-0">Komponen lipat</h3>
+                  <button type="button" class="btn btn-sm btn-quiet ms-auto" id="tambah-lipat">Tambah Komponen</button>
+                </div>
+                <div id="lipat-rows">
+                  {% for row in lipat_rows %}
+                    {% include "kalkulator/_lipat_row.html" with row=row %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="panel no-print">
+        <div class="panel-body d-flex flex-wrap gap-2 justify-content-end">
+          <a class="btn-quiet" href="{% url 'kalkulator:ongkos_list' %}">Batal</a>
+          {% if edit %}
+            <button type="submit" class="btn btn-outline-danger"
+                    formaction="{% url 'kalkulator:ongkos_hapus' edit.pk %}"
+                    onclick="return confirm('Hapus {{ edit.nomor }}?')">Hapus</button>
+            <a class="btn-quiet" href="{% url 'kalkulator:ongkos_cetak' edit.pk %}" target="_blank" rel="noopener">Cetak</a>
+            <a class="btn-quiet" href="{% url 'kalkulator:ongkos_cetak_cust' edit.pk %}" target="_blank" rel="noopener">Cetak Untuk Cust</a>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+
+    <div class="col-xl-4">
+      <aside class="panel summary" id="ringkasan" aria-labelledby="judul-hasil">
+        <div class="panel-head summary-head">
+          <h2 id="judul-hasil">Hasil</h2>
+          <span id="sync-badge" class="badge text-bg-warning ms-auto d-none">belum tersinkron</span>
+        </div>
+        <div class="panel-body" id="ringkasan-body">
+          {% if hasil %}
+            {% include "kalkulator/_ongkos_ringkasan.html" %}
+          {% else %}
+            <p class="text-muted small mb-0">Perbaiki input yang ditandai untuk melihat hasil.</p>
+          {% endif %}
+        </div>
+      </aside>
+      <div id="live-errors" class="alert alert-warning mt-2 d-none"></div>
+    </div>
+  </div>
+</form>
+
+<section class="panel mt-4" id="rincian">
+  <div class="panel-head">
+    <h2>Rincian ongkos cetak</h2>
+    <p>Plat, ongkos cetak, druk, lipat, dan potong.</p>
+  </div>
+  <div class="rincian-body" id="rincian-body">
+    {% if hasil %}
+      {% include "kalkulator/_ongkos_rincian.html" %}
+    {% else %}
+      <div class="panel-body text-muted small">Belum ada perhitungan.</div>
+    {% endif %}
+  </div>
+</section>
+
+<template id="plat-template">{% include "kalkulator/_plat_row.html" with row=plat_kosong %}</template>
+<template id="lipat-template">{% include "kalkulator/_lipat_row.html" with row=lipat_kosong %}</template>
+
+{{ plat_map|json_script:"plat-map" }}
+{{ harga_plat_map|json_script:"harga-plat-map" }}
+{{ tarif_cetak_map|json_script:"tarif-cetak-map" }}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const form = document.getElementById("form-ongkos");
+  const platRows = document.getElementById("plat-rows");
+  const lipatRows = document.getElementById("lipat-rows");
+  const ringkasan = document.getElementById("ringkasan-body");
+  const rincian = document.getElementById("rincian-body");
+  const badge = document.getElementById("sync-badge");
+  const errorBox = document.getElementById("live-errors");
+  const platMap = JSON.parse(document.getElementById("plat-map").textContent);
+  const hargaPlatMap = JSON.parse(document.getElementById("harga-plat-map").textContent);
+  const tarifCetakMap = JSON.parse(document.getElementById("tarif-cetak-map").textContent);
+  const ROW_NAMES = new Set(["judul_komponen", "unit_plat", "plat_per_set", "jumlah_keteran", "plat_owner", "harga_plat", "tarif_cetak", "lipat_faktor", "harga_lipat"]);
+  let timer = null;
+
+  function cookie(name) {
+    return document.cookie.split("; ").find((row) => row.startsWith(name + "="))?.split("=")[1] || "";
+  }
+
+  function collectRows(container) {
+    return Array.from(container.querySelectorAll("[data-plat-row], [data-lipat-row]")).map(function (row) {
+      const data = {};
+      row.querySelectorAll("[name]").forEach(function (field) {
+        data[field.name] = field.value;
+      });
+      return data;
+    });
+  }
+
+  function collect() {
+    const data = {};
+    new FormData(form).forEach(function (value, key) {
+      if (["csrfmiddlewaretoken", "pelanggan", "judul_buku"].includes(key) || ROW_NAMES.has(key)) return;
+      data[key] = value;
+    });
+    data.plat_rows = collectRows(platRows);
+    data.lipat_rows = collectRows(lipatRows);
+    return data;
+  }
+
+  async function refresh() {
+    try {
+      const response = await fetch("{% url 'kalkulator:api_ongkos' %}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": cookie("csrftoken") },
+        body: JSON.stringify(collect())
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        badge.textContent = "belum tersinkron";
+        badge.classList.remove("d-none");
+        errorBox.textContent = "Lengkapi semua field dengan angka yang valid untuk melihat hasil.";
+        errorBox.classList.remove("d-none");
+        return;
+      }
+      ringkasan.innerHTML = payload.ringkasan;
+      rincian.innerHTML = payload.rincian;
+      errorBox.classList.add("d-none");
+      if (payload.partial) {
+        badge.textContent = "pratinjau (kosong = 0)";
+        badge.classList.remove("d-none");
+      } else {
+        badge.classList.add("d-none");
+      }
+    } catch (error) {
+      badge.textContent = "belum tersinkron";
+      badge.classList.remove("d-none");
+    }
+  }
+
+  function parsePlat(value) {
+    const match = /^\s*(\d+)\s*\/\s*(\d+)\s*$/.exec(value || "");
+    return match ? Number(match[1]) + Number(match[2]) : 0;
+  }
+
+  function syncUnit(row, fill) {
+    const unit = row.querySelector('[name="unit_plat"]');
+    const perSet = row.querySelector('[name="plat_per_set"]');
+    if (!unit || !perSet) return;
+    const value = unit.value;
+    const jumlah = platMap[value] || parsePlat(value);
+    perSet.readOnly = Boolean(jumlah);
+    if (!fill || !jumlah) return;
+    perSet.value = jumlah;
+    const harga = row.querySelector('[name="harga_plat"]');
+    const tarif = row.querySelector('[name="tarif_cetak"]');
+    if (harga && hargaPlatMap[value]) harga.value = hargaPlatMap[value];
+    if (tarif && tarifCetakMap[value]) tarif.value = tarifCetakMap[value];
+  }
+
+  function tambahBaris(container, templateId, plat) {
+    const template = document.getElementById(templateId);
+    const baris = template.content.firstElementChild.cloneNode(true);
+    container.appendChild(baris);
+    if (plat) syncUnit(baris, true);
+    syncLipatOplah();
+    form.dispatchEvent(new Event("input"));
+  }
+
+  function syncLipatOplah() {
+    const plat = Array.from(platRows.querySelectorAll("[data-plat-row]"));
+    const lipat = Array.from(lipatRows.querySelectorAll("[data-lipat-row]"));
+    lipat.forEach(function (row, index) {
+      const input = row.querySelector("[data-oplah-lipat]");
+      const sumber = plat[index] ? plat[index].querySelector('[name="oplah"]') : null;
+      if (input) input.value = sumber ? sumber.value : "";
+    });
+  }
+
+  function hapusBaris(container, tombol) {
+    const baris = tombol.closest("[data-plat-row], [data-lipat-row]");
+    if (!baris) return;
+    if (container.children.length > 1) {
+      baris.remove();
+    } else {
+      baris.querySelectorAll("input, select").forEach(function (field) {
+        field.value = field.name === "plat_owner" ? "reda" : "";
+      });
+    }
+    syncLipatOplah();
+    form.dispatchEvent(new Event("input"));
+  }
+
+  document.getElementById("tambah-plat").addEventListener("click", function () {
+    tambahBaris(platRows, "plat-template", true);
+  });
+  document.getElementById("tambah-lipat").addEventListener("click", function () {
+    tambahBaris(lipatRows, "lipat-template", false);
+  });
+
+  [platRows, lipatRows].forEach(function (container) {
+    container.addEventListener("click", function (event) {
+      if (event.target.matches("[data-hapus]")) hapusBaris(container, event.target);
+    });
+  });
+
+  platRows.addEventListener("change", function (event) {
+    if (event.target.name !== "unit_plat") return;
+    const baris = event.target.closest("[data-plat-row]");
+    if (baris) {
+      syncUnit(baris, true);
+      form.dispatchEvent(new Event("input"));
+    }
+  });
+
+  Array.from(platRows.querySelectorAll("[data-plat-row]")).forEach(function (row) {
+    syncUnit(row, false);
+  });
+  syncLipatOplah();
+
+  form.addEventListener("input", function () {
+    syncLipatOplah();
+    clearTimeout(timer);
+    timer = setTimeout(refresh, 400);
+  });
+})();
+</script>
+{% endblock %}

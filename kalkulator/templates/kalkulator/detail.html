@@ -1,0 +1,64 @@
+{% extends "kalkulator/base.html" %}
+{% block title %}Penawaran {{ q.nomor }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="crumbs">
+      <a href="{% url 'kalkulator:dashboard' %}">Penawaran</a>
+      <span aria-hidden="true">/</span>
+      <span class="here">{{ q.nomor }}</span>
+    </div>
+    <h1 class="title">{{ q.nomor }}</h1>
+    <div class="text-muted small mt-1">
+      {{ q.dibuat_pada|date:"d/m/Y H:i" }}
+      {% if q.pelanggan %}&middot; {{ q.pelanggan }}{% endif %}
+      {% if q.judul_buku %}&middot; {{ q.judul_buku }}{% endif %}
+    </div>
+  </div>
+  <div class="page-actions no-print">
+    <a class="btn-brand" href="{% url 'kalkulator:ubah' q.pk %}">Ubah</a>
+    <a class="btn-quiet" href="{% url 'kalkulator:duplikat' q.pk %}">Duplikat</a>
+    <a class="btn-quiet" href="{% url 'kalkulator:cetak' q.pk %}">Cetak</a>
+    <form method="post" action="{% url 'kalkulator:hapus' q.pk %}" onsubmit="return confirm('Hapus {{ q.nomor }}?')" class="d-inline">
+      {% csrf_token %}
+      <button class="btn btn-outline-danger" type="submit">Hapus</button>
+    </form>
+  </div>
+</div>
+
+<div class="row g-4 align-items-start">
+  <div class="col-xl-7 order-2 order-xl-1">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Informasi penawaran</h2>
+        <p>Detail buku dan data pelanggan.</p>
+      </div>
+      <div class="panel-body">
+        <dl class="row small mb-0">
+          <dt class="col-5 col-sm-4">Telepon</dt><dd class="col-7 col-sm-8">{{ q.telepon|default:"-" }}</dd>
+          <dt class="col-5 col-sm-4">Ukuran buku</dt><dd class="col-7 col-sm-8">{{ q.ukuran_buku|default:"-" }}</dd>
+          <dt class="col-5 col-sm-4">Bahan isi</dt><dd class="col-7 col-sm-8">{{ q.bahan_isi|default:"-" }}</dd>
+          <dt class="col-5 col-sm-4">Bahan cover</dt><dd class="col-7 col-sm-8">{{ q.bahan_cover|default:"-" }}</dd>
+          <dt class="col-5 col-sm-4">Oplah</dt><dd class="col-7 col-sm-8">{{ q.oplah }} eksemplar</dd>
+          <dt class="col-5 col-sm-4">Dibuat oleh</dt><dd class="col-7 col-sm-8">{{ q.dibuat_oleh|default:"-" }}</dd>
+        </dl>
+      </div>
+    </section>
+  </div>
+  <div class="col-xl-5 order-1 order-xl-2">
+    <aside class="panel">
+      <div class="panel-body">
+        {% include "kalkulator/_ringkasan.html" %}
+      </div>
+    </aside>
+  </div>
+</div>
+
+<section class="panel mt-4">
+  <div class="panel-head">
+    <h2>Rincian per pos</h2>
+    <p>Seluruh pos biaya yang membentuk subtotal.</p>
+  </div>
+  {% include "kalkulator/_rincian.html" %}
+</section>
+{% endblock %}

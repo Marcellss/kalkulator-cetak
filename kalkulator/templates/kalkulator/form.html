@@ -1,0 +1,255 @@
+{% extends "kalkulator/base.html" %}
+{% block title %}{% if edit_nomor %}Ubah Penawaran{% else %}Hitung Penawaran{% endif %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="crumbs">
+      <a href="{% url 'kalkulator:dashboard' %}">Penawaran</a>
+      <span aria-hidden="true">/</span>
+      <span class="here">{% if edit_nomor %}Ubah{% else %}Hitung Baru{% endif %}</span>
+    </div>
+    <h1 class="title">{% if edit_nomor %}Ubah Penawaran{% else %}Hitung Penawaran{% endif %}</h1>
+    <div class="d-flex flex-wrap gap-2 mt-2">
+      {% if edit_nomor %}<span class="badge text-bg-dark">{{ edit_nomor }}</span>{% endif %}
+      {% if preset %}<span class="badge text-bg-info">Preset: {{ preset.nama }}</span>{% endif %}
+      {% if asal_nomor %}<span class="badge text-bg-secondary">Duplikat dari {{ asal_nomor }}</span>{% endif %}
+    </div>
+  </div>
+  <div class="page-actions no-print">
+    <a class="btn-quiet d-xl-none" href="#ringkasan">Lihat Hasil</a>
+    <button class="btn-brand" type="submit" form="kalkulator-form">
+      {% if edit_nomor %}Simpan Perubahan{% else %}Hitung &amp; Simpan{% endif %}
+    </button>
+  </div>
+</div>
+
+{% if errors %}
+  <div class="alert alert-danger py-2">Periksa field yang ditandai merah.</div>
+{% endif %}
+
+<form method="post" action="{% if form_action %}{{ form_action }}{% else %}{% url 'kalkulator:hitung' %}{% endif %}" id="kalkulator-form" novalidate>
+  {% csrf_token %}
+  <div class="row g-4 align-items-start">
+    <div class="col-xl-8">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Data penawaran</h2>
+          <p>Pelanggan, buku, dan keterangan tambahan.</p>
+        </div>
+        <div class="panel-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="pelanggan">Pelanggan</label>
+              <input class="form-control" id="pelanggan" name="pelanggan" value="{{ request.POST.pelanggan|default:pelanggan }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="telepon">Nomor Telepon Pelanggan</label>
+              <input class="form-control" id="telepon" name="telepon" value="{{ request.POST.telepon|default:telepon }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="judul_buku">Judul buku</label>
+              <input class="form-control" id="judul_buku" name="judul_buku" value="{{ request.POST.judul_buku|default:judul_buku }}">
+            </div>
+            {% for f in info_fields %}
+              <div class="col-md-6">
+                <label class="form-label" for="id_{{ f.key }}">{{ f.label }}</label>
+                {% if f.choices %}
+                  <select class="form-select{% if f.error %} is-invalid{% endif %}" id="id_{{ f.key }}" name="{{ f.key }}">
+                    {% for value, label in f.choices %}
+                      <option value="{{ value }}" {% if value == f.value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                {% elif f.suggestions %}
+                  <input class="form-control{% if f.error %} is-invalid{% endif %}" id="id_{{ f.key }}" name="{{ f.key }}" value="{{ f.value }}" list="sug-{{ f.key }}">
+                  <datalist id="sug-{{ f.key }}">
+                    {% for option in f.suggestions %}<option value="{{ option }}">{% endfor %}
+                  </datalist>
+                {% else %}
+                  <input class="form-control{% if f.error %} is-invalid{% endif %}" id="id_{{ f.key }}" name="{{ f.key }}" value="{{ f.value }}">
+                {% endif %}
+                {% if f.error %}<div class="text-danger small">{{ f.error }}</div>{% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Rincian input</h2>
+          <p>Isi setiap bagian. Hasil perhitungan diperbarui otomatis.</p>
+        </div>
+        <div class="tabs nav" role="tablist" aria-label="Bagian perhitungan">
+          {% for group in groups %}
+            <button class="nav-link {% if forloop.first %}active{% endif %}" id="tab-{{ group.key }}"
+                    data-bs-toggle="tab" data-bs-target="#g-{{ group.key }}" type="button" role="tab"
+                    aria-controls="g-{{ group.key }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+              {{ group.label }}
+            </button>
+          {% endfor %}
+        </div>
+        <div class="panel-body tab-content">
+          {% for group in groups %}
+            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="g-{{ group.key }}" role="tabpanel" aria-labelledby="tab-{{ group.key }}">
+              <div class="row g-3">
+                {% for f in group.fields %}
+                  <div class="col-md-6">
+                    <label class="form-label" for="id_{{ f.key }}">{{ f.label }}</label>
+                    {% if f.choices %}
+                      <select class="form-select{% if f.error %} is-invalid{% endif %}" id="id_{{ f.key }}" name="{{ f.key }}">
+                        {% for value, label in f.choices %}
+                          <option value="{{ value }}" {% if value == f.value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                      </select>
+                    {% else %}
+                      <div class="input-group">
+                        <input class="form-control num{% if f.error %} is-invalid{% endif %}"
+                               id="id_{{ f.key }}" name="{{ f.key }}" value="{{ f.value }}"
+                               type="number" inputmode="decimal" min="0"
+                               step="{% if f.kind == 'int' %}1{% else %}any{% endif %}">
+                        {% if f.unit != '-' %}<span class="input-group-text">{{ f.unit }}</span>{% endif %}
+                      </div>
+                    {% endif %}
+                    {% if f.error %}<div class="text-danger small">{{ f.error }}</div>{% endif %}
+                  </div>
+                {% endfor %}
+                {% if group.key == 'harga' %}
+                  <div class="col-md-6">
+                    <label class="form-label" for="id_pembulatan">Pembulatan harga unit</label>
+                    <select class="form-select" id="id_pembulatan" name="pembulatan">
+                      {% for value, label in pembulatan_choices %}
+                        <option value="{{ value }}" {% if value == pembulatan %}selected{% endif %}>{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="panel no-print">
+        <div class="panel-head">
+          <h2>Preset tarif</h2>
+          <p>Simpan isian saat ini sebagai preset, atau perbarui preset yang sedang dipakai.</p>
+        </div>
+        <div class="panel-body">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-6">
+              <label class="form-label" for="nama_preset">Nama preset</label>
+              <input class="form-control{% if errors.nama_preset %} is-invalid{% endif %}" id="nama_preset" name="nama_preset"
+                     placeholder="mis. Offset A5 80gsm 2026" value="{{ preset.nama|default:'' }}">
+              {% if errors.nama_preset %}<div class="text-danger small">{{ errors.nama_preset }}</div>{% endif %}
+            </div>
+            <div class="col-md-6 d-flex flex-wrap gap-2 justify-content-md-end">
+              {% if preset %}
+                <button type="submit" class="btn-quiet" formaction="{% url 'kalkulator:preset_ubah' preset.pk %}">Perbarui Preset</button>
+              {% else %}
+                <button type="submit" class="btn-quiet" formaction="{% url 'kalkulator:preset_baru' %}">Simpan sebagai Preset</button>
+              {% endif %}
+              {% if edit_pk %}
+                <button type="submit" class="btn btn-outline-danger"
+                        formaction="{% url 'kalkulator:hapus' edit_pk %}"
+                        onclick="return confirm('Hapus penawaran ini?')">Hapus</button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-xl-4">
+      <aside class="panel summary" id="ringkasan" aria-labelledby="judul-hasil">
+        <div class="panel-head summary-head">
+          <h2 id="judul-hasil">Hasil</h2>
+          <span id="sync-badge" class="badge text-bg-warning ms-auto d-none">belum tersinkron</span>
+        </div>
+        <div class="panel-body" id="ringkasan-body">
+          {% if hasil %}
+            {% include "kalkulator/_ringkasan.html" %}
+          {% else %}
+            <p class="text-muted small mb-0">Perbaiki input yang ditandai untuk melihat hasil.</p>
+          {% endif %}
+        </div>
+      </aside>
+      <div id="live-errors" class="alert alert-warning mt-2 d-none"></div>
+    </div>
+  </div>
+</form>
+
+<section class="panel mt-4" id="rincian">
+  <div class="panel-head">
+    <h2>Rincian per pos</h2>
+    <p>Seluruh pos biaya yang membentuk subtotal.</p>
+  </div>
+  <div class="rincian-body" id="rincian-body">
+    {% if hasil %}
+      {% include "kalkulator/_rincian.html" %}
+    {% else %}
+      <div class="panel-body text-muted small">Belum ada perhitungan.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const form = document.getElementById("kalkulator-form");
+  const ringkasan = document.getElementById("ringkasan-body");
+  const rincian = document.getElementById("rincian-body");
+  const badge = document.getElementById("sync-badge");
+  const errorBox = document.getElementById("live-errors");
+  let timer = null;
+
+  function cookie(name) {
+    return document.cookie.split("; ").find((row) => row.startsWith(name + "="))?.split("=")[1] || "";
+  }
+
+  function collect() {
+    const data = {};
+    new FormData(form).forEach(function (value, key) {
+      if (["csrfmiddlewaretoken", "pelanggan", "judul_buku", "nama_preset"].includes(key)) return;
+      data[key] = value;
+    });
+    return data;
+  }
+
+  async function refresh() {
+    try {
+      const response = await fetch("{% url 'kalkulator:api_hitung' %}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": cookie("csrftoken") },
+        body: JSON.stringify(collect())
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        badge.textContent = "belum tersinkron";
+        badge.classList.remove("d-none");
+        errorBox.textContent = "Lengkapi semua field dengan angka yang valid untuk melihat hasil.";
+        errorBox.classList.remove("d-none");
+        return;
+      }
+      ringkasan.innerHTML = payload.ringkasan;
+      rincian.innerHTML = payload.rincian;
+      errorBox.classList.add("d-none");
+      if (payload.partial) {
+        badge.textContent = "pratinjau (kosong = 0)";
+        badge.classList.remove("d-none");
+      } else {
+        badge.classList.add("d-none");
+      }
+    } catch (error) {
+      badge.textContent = "belum tersinkron";
+      badge.classList.remove("d-none");
+    }
+  }
+
+  form.addEventListener("input", function () {
+    clearTimeout(timer);
+    timer = setTimeout(refresh, 400);
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% load formatting %}
+<div class="kicker">Harga per unit setelah diskon</div>
+<div class="price num"><small>Rp</small>{{ hasil.harga_unit_setelah_diskon_final|nominal }}</div>
+<div class="price-meta">
+  <span>Harga per unit {{ hasil.harga_unit_final|rupiah }}</span>
+  <span class="save">Diskon {{ hasil.diskon|rupiah }}</span>
+</div>
+
+<dl class="kv-list num">
+  <div class="kv"><dt>Subtotal</dt><dd>{{ hasil.subtotal|rupiah }}</dd></div>
+  <div class="kv"><dt>Margin ({{ hasil.margin_persen|angka }}%)</dt><dd>{{ hasil.nilai_margin|rupiah }}</dd></div>
+  <div class="kv"><dt>Total</dt><dd>{{ hasil.total|rupiah }}</dd></div>
+  <div class="kv"><dt>Harga per unit</dt><dd>{{ hasil.harga_unit|rupiah }}</dd></div>
+  <div class="kv"><dt>Diskon</dt><dd>{{ hasil.diskon|rupiah }}</dd></div>
+  <div class="kv strong"><dt>Total setelah diskon</dt><dd>{{ hasil.total_setelah_diskon|rupiah }}</dd></div>
+</dl>
+{% if hasil.pembulatan != 'none' %}
+  <div class="small text-muted mt-2">Harga unit dibulatkan. Nilai presisi: {{ hasil.harga_unit|rupiah }} / unit, setelah diskon {{ hasil.harga_unit_setelah_diskon|rupiah }} / unit.</div>
+{% endif %}

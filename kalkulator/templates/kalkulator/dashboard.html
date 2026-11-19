@@ -1,0 +1,53 @@
+{% extends "kalkulator/base.html" %}
+{% load formatting %}
+{% block title %}Penawaran{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">Penawaran terakhir</h1>
+  <a class="btn btn-primary ms-auto" href="{% url 'kalkulator:hitung' %}">Hitung Baru</a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Nomor</th>
+          <th class="d-none d-md-table-cell">Tanggal</th>
+          <th>Pelanggan / buku</th>
+          <th class="text-end">Total</th>
+          <th class="text-end d-none d-lg-table-cell">Harga / unit</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for q in quotations %}
+          <tr>
+            <td>
+              <a href="{% url 'kalkulator:ubah' q.pk %}">{{ q.nomor }}</a>
+              <div class="small text-muted d-md-none">{{ q.dibuat_pada|date:"d/m/Y" }}</div>
+            </td>
+            <td class="small d-none d-md-table-cell">{{ q.dibuat_pada|date:"d/m/Y H:i" }}</td>
+            <td>{{ q.pelanggan|default:"-" }}{% if q.judul_buku %}<div class="small text-muted">{{ q.judul_buku }}</div>{% endif %}</td>
+            <td class="text-end angka">{{ q.total|rupiah }}</td>
+            <td class="text-end angka d-none d-lg-table-cell">{{ q.harga_unit|rupiah }}</td>
+            <td class="text-end no-print">
+              <div class="d-flex flex-wrap gap-1 justify-content-end">
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'kalkulator:duplikat' q.pk %}">Duplikat</a>
+                <a class="btn btn-sm btn-outline-dark" href="{% url 'kalkulator:cetak' q.pk %}">Cetak</a>
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'kalkulator:cetak_cust' q.pk %}" target="_blank" rel="noopener">Cetak Untuk Cust</a>
+                <form method="post" action="{% url 'kalkulator:hapus' q.pk %}" onsubmit="return confirm('Hapus {{ q.nomor }}?')">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger" type="submit">Hapus</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-center text-muted py-4">Belum ada penawaran. Mulai dengan "Hitung Baru".</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

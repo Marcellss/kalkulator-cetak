@@ -1,0 +1,32 @@
+<div class="komponen-row border rounded p-3 mb-3" data-lipat-row>
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <span class="fw-semibold small">Komponen lipat</span>
+    <button type="button" class="btn btn-sm btn-outline-danger" data-hapus>Hapus</button>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label">Jumlah lembar (dari oplah plat)</label>
+      <div class="input-group">
+        <input class="form-control num" value="{{ row.jumlah_lembar }}" readonly data-oplah-lipat>
+        <span class="input-group-text">lembar</span>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Lipat</label>
+      <select class="form-select{% if row.errors.lipat_faktor %} is-invalid{% endif %}" name="lipat_faktor">
+        {% for value, label in lipat_choices %}
+          <option value="{{ value }}" {% if value == row.lipat_faktor %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      {% if row.errors.lipat_faktor %}<div class="text-danger small">{{ row.errors.lipat_faktor }}</div>{% endif %}
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Harga lipat setelah 3000</label>
+      <div class="input-group">
+        <input class="form-control num{% if row.errors.harga_lipat %} is-invalid{% endif %}" name="harga_lipat" type="number" min="0" step="any" value="{{ row.harga_lipat }}">
+        <span class="input-group-text">Rp</span>
+      </div>
+      {% if row.errors.harga_lipat %}<div class="text-danger small">{{ row.errors.harga_lipat }}</div>{% endif %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,47 @@
+{% extends "kalkulator/base.html" %}
+{% load formatting %}
+{% block title %}Master Kertas{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">Master kertas</h1>
+  <a class="btn btn-primary ms-auto" href="{% url 'kalkulator:kertas_baru' %}">Tambah Kertas</a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Nama</th><th class="text-end d-none d-md-table-cell">Plano (cm)</th><th class="text-end d-none d-md-table-cell">Gramasi</th>
+          <th class="text-end">Harga/kg</th><th>Status</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for k in kertas %}
+          <tr>
+            <td>
+              {{ k.nama }}
+              <div class="small text-muted d-md-none">{{ k.panjang_cm|angka }} &times; {{ k.lebar_cm|angka }} cm &middot; {{ k.gramasi|angka }} gsm</div>
+            </td>
+            <td class="text-end angka d-none d-md-table-cell">{{ k.panjang_cm|angka }} &times; {{ k.lebar_cm|angka }}</td>
+            <td class="text-end angka d-none d-md-table-cell">{{ k.gramasi|angka }}</td>
+            <td class="text-end angka">{{ k.harga_per_kg|rupiah }}</td>
+            <td>{{ k.aktif|yesno:"Aktif,Nonaktif" }}</td>
+            <td class="text-end">
+              <div class="d-flex flex-wrap gap-1 justify-content-end">
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'kalkulator:kertas_ubah' k.pk %}">Ubah</a>
+                <form method="post" action="{% url 'kalkulator:kertas_hapus' k.pk %}" class="d-inline">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger" type="submit">Hapus</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-center text-muted py-4">Belum ada data kertas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

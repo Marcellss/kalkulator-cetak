@@ -1,0 +1,99 @@
+{% load formatting %}<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Penawaran {{ q.nomor }} - Kalkulator Cetak</title>
+  {% include "kalkulator/_favicon.html" %}
+  <style>
+    * { box-sizing: border-box; }
+    @page { margin: 18mm; }
+    body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #111; margin: 24px; }
+    .num { font-variant-numeric: tabular-nums; font-family: Consolas, monospace; }
+    .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #111; padding-bottom: 8px; margin-bottom: 16px; }
+    .head h1 { font-size: 18px; margin: 0; }
+    .sub { font-size: 11px; color: #555; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 5px 6px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
+    .spec th { width: 32%; font-weight: normal; color: #555; }
+    .harga th { font-weight: normal; }
+    .harga td { text-align: right; white-space: nowrap; }
+    .harga .final th, .harga .final td { font-weight: bold; font-size: 14px; border-top: 2px solid #111; border-bottom: 2px solid #111; padding: 8px 6px; }
+    .buku th { font-weight: bold; border-bottom: 1px solid #999; }
+    .buku .right { text-align: right; white-space: nowrap; }
+    .note { font-size: 11px; color: #555; margin-top: 12px; }
+    .signature { display: flex; justify-content: space-between; margin-top: 56px; }
+    .signature .pihak { width: 220px; text-align: center; display: flex; flex-direction: column; justify-content: flex-end; min-height: 90px; }
+    .signature .nama { border-top: 1px solid #111; padding-top: 4px; margin-top: 2px; }
+    .toolbar { margin-bottom: 16px; }
+    @media print { .toolbar { display: none; } body { margin: 0; } }
+  </style>
+</head>
+<body>
+  <div class="toolbar"><button onclick="window.print()">Cetak / Simpan PDF</button></div>
+
+  <div class="head">
+    <div>
+      <div style="display:flex;align-items:center;gap:10px">
+        {% include "kalkulator/_logo.html" %}
+        <h1>Reda Printing</h1>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div><strong>INVOICE {{ q.nomor }}</strong></div>
+      <div class="sub">{{ q.dibuat_pada|date:"d/m/Y" }}</div>
+    </div>
+  </div>
+
+  <table class="spec">
+    <tr><th>Pelanggan</th><td>{{ q.pelanggan|default:"-" }}</td></tr>
+    <tr><th>Telepon</th><td>{{ q.telepon|default:"-" }}</td></tr>
+    <tr><th>Judul Pekerjaan</th><td>{{ q.judul_buku|default:"-" }}</td></tr>
+    <tr><th>Oplah</th><td>{{ q.oplah }} Lembar</td></tr>
+    <tr><th>Jumlah komponen plat</th><td>{{ hasil.plat_rows|length }}</td></tr>
+    <tr><th>Jumlah plat</th><td>{{ hasil.total_plat|angka }} plat</td></tr>
+  </table>
+
+  {% if hasil.plat_rows|length > 1 %}
+    <h2 style="font-size:13px;margin:16px 0 8px">Rincian Pekerjaan</h2>
+    <table class="buku">
+      <thead>
+        <tr>
+          <th>Judul</th>
+          <th class="right" style="width:16%">Unit plat</th>
+          <th class="right" style="width:14%">Oplah</th>
+          <th class="right" style="width:16%">Jumlah plat</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in hasil.plat_rows %}
+          <tr>
+            <td>{{ row.judul_komponen|default:"-" }}</td>
+            <td class="right">{{ row.unit_plat|default:"-" }}</td>
+            <td class="right num">{{ row.oplah|angka }}</td>
+            <td class="right num">{{ row.jumlah_plat|angka }} plat</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+  <h2 style="font-size:13px;margin:16px 0 8px">Rincian harga</h2>
+  <table class="harga">
+    <tr><th>Total Harga</th><td class="num">{{ hasil.total|rupiah }}</td></tr>
+    <tr><th>Diskon</th><td class="num">-{{ hasil.diskon|rupiah }}</td></tr>
+    <tr class="final"><th>Total setelah diskon</th><td class="num">{{ hasil.total_setelah_diskon|rupiah }}</td></tr>
+    <tr><th>Harga per eksemplar</th><td class="num">{{ hasil.harga_unit_setelah_diskon|rupiah }}</td></tr>
+  </table>
+
+
+  <div class="signature">
+    <div class="pihak">
+      {% include "kalkulator/_signature.html" %}
+      <div class="nama">Celestino Reda</div>
+    </div>
+    <div class="pihak">
+      <div class="nama">{{ q.pelanggan|default:"Pelanggan" }}</div>
+    </div>
+  </div>
+</body>
+</html>

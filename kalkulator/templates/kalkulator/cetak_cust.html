@@ -1,0 +1,127 @@
+{% load formatting %}<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Penawaran {{ q.nomor }} - Kalkulator Cetak</title>
+  {% include "kalkulator/_favicon.html" %}
+  <style>
+    * { box-sizing: border-box; }
+    @page { margin: 18mm; }
+    body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #111; margin: 24px; }
+    .angka { font-variant-numeric: tabular-nums; font-family: Consolas, monospace; }
+    .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #111; padding-bottom: 8px; margin-bottom: 16px; }
+    .head h1 { font-size: 18px; margin: 0; }
+    .head .sub { font-size: 11px; color: #555; }
+    h2 { font-size: 13px; margin: 16px 0 8px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 5px 6px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
+    .spec th { width: 32%; font-weight: normal; color: #555; }
+    .harga th { font-weight: normal; }
+    .harga td { text-align: right; white-space: nowrap; }
+    .harga .final th, .harga .final td { font-weight: bold; font-size: 14px; border-top: 2px solid #111; border-bottom: 2px solid #111; padding: 8px 6px; }
+    .note { font-size: 11px; color: #555; margin-top: 12px; }
+    .signature { display: flex; justify-content: space-between; margin-top: 56px; }
+    .signature .pihak { width: 220px; text-align: center; display: flex; flex-direction: column; justify-content: flex-end; min-height: 90px; }
+    .signature .nama { border-top: 1px solid #111; padding-top: 4px; margin-top: 2px; }
+    .toolbar { margin-bottom: 16px; }
+    @media print { .toolbar { display: none; } body { margin: 0; } }
+  </style>
+</head>
+<body>
+  <div class="toolbar"><button onclick="window.print()">Cetak / Simpan PDF</button></div>
+
+  <div class="head">
+    <div>
+      <div style="display:flex;align-items:center;gap:10px">
+        {% include "kalkulator/_logo.html" %}
+        <h1>Reda Printing</h1>
+      </div>
+      <div class="sub">Penawaran harga cetak</div>
+    </div>
+    <div style="text-align:right">
+      <div><strong>{{ q.nomor }}</strong></div>
+      <div class="sub">{{ q.dibuat_pada|date:"d/m/Y" }}</div>
+    </div>
+  </div>
+
+  <table class="spec">
+    <tr><th>Pelanggan</th><td>{{ q.pelanggan|default:"-" }}</td></tr>
+    <tr><th>Telepon</th><td>{{ q.telepon|default:"-" }}</td></tr>
+    <tr><th>Judul buku</th><td>{{ q.judul_buku|default:"-" }}</td></tr>
+    <tr><th>Oplah</th><td>{{ q.oplah }} Lembar</td></tr>
+    <tr><th>Jumlah halaman isi</th><td>{{ hasil.jlh_hal_isi|angka }} halaman</td></tr>
+    <tr><th>Ukuran buku</th><td>{{ q.ukuran_buku|default:"-" }}</td></tr>
+    <tr>
+      <th>Kertas isi</th>
+      <td>
+        {{ q.bahan_isi|default:"-" }}
+        {% if hasil.plano_isi or hasil.gramasi_isi %}
+          <span class="sub">
+            {% if hasil.plano_isi %}&middot; {{ hasil.plano_isi|plano }}{% endif %}
+            {% if hasil.gramasi_isi %}&middot; {{ hasil.gramasi_isi|angka }} gsm{% endif %}
+          </span>
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th>Kertas cover</th>
+      <td>
+        {{ q.bahan_cover|default:"-" }}
+        {% if hasil.plano_cover or hasil.gramasi_cover %}
+          <span class="sub">
+            {% if hasil.plano_cover %}&middot; {{ hasil.plano_cover|plano }}{% endif %}
+            {% if hasil.gramasi_cover %}&middot; {{ hasil.gramasi_cover|angka }} gsm{% endif %}
+          </span>
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th>Lipat</th>
+      <td>{{ q.lipat_faktor_a|default:"-" }}
+        {% if hasil.lipat_faktor_a and hasil.lipat_faktor_b %}
+          <span class="sub"> {{ hasil.lipat_faktor_a|angka }} </span>
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th>Finishing</th>
+      <td>{{ hasil.finishing|default:"-" }}</td>
+    </tr>
+    <tr>
+      <th>Cetak cover</th>
+      <td>{{ hasil.cetak_cover|default:"-" }}</td>
+    </tr>
+    <tr>
+      <th>Bending</th>
+      <td>{% if hasil.bending_jumlah %}Ada{% else %}-{% endif %}</td>
+    </tr>
+    <tr>
+      <th>Wrapping</th>
+      <td>{% if hasil.wrapping_jumlah %}Ada{% else %}-{% endif %}</td>
+    </tr>
+  </table>
+
+  <h2>Rincian harga</h2>
+  <table class="harga">
+    {% if ada_diskon %}
+      <tr><th>Total penawaran</th><td class="angka">{{ hasil.total|rupiah }}</td></tr>
+      <tr><th>Diskon</th><td class="angka">-{{ hasil.diskon|rupiah }}</td></tr>
+      <tr class="final"><th>Total</th><td class="angka">{{ total_cust|rupiah }}</td></tr>
+    {% else %}
+      <tr class="final"><th>Total penawaran</th><td class="angka">{{ total_cust|rupiah }}</td></tr>
+    {% endif %}
+    <tr><th>Harga per eksemplar</th><td class="angka">{{ harga_unit_cust|rupiah }}</td></tr>
+  </table>
+
+
+  <div class="signature">
+    <div class="pihak">
+      {% include "kalkulator/_signature.html" %}
+      <div class="nama">Celestino Reda</div>
+    </div>
+    <div class="pihak">
+      <div class="nama">{{ q.pelanggan|default:"Pelanggan" }}</div>
+    </div>
+  </div>
+</body>
+</html>

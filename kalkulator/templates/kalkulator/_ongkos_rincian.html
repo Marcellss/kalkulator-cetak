@@ -1,0 +1,55 @@
+{% load formatting %}
+<div class="table-responsive">
+  <table class="table table-pos num mb-0">
+    <thead>
+      <tr><th>Pos</th><th class="text-end">Subtotal</th></tr>
+    </thead>
+    <tbody>
+      {% for row in hasil.plat_rows %}
+        <tr>
+          <td><span class="pos">Plat {{ forloop.counter }}{% if row.judul_komponen %} — {{ row.judul_komponen }}{% endif %}</span>
+            <div class="how mono">{{ row.unit_plat|default:"-" }} &middot; {{ row.jumlah_plat|angka }} plat &middot; {% if row.plat_owner == "customer" %}disediakan customer{% else %}{{ row.harga_plat|rupiah }}/plat{% endif %}</div>
+          </td>
+          <td class="amt">{{ row.subtotal_plat|rupiah }}</td>
+        </tr>
+        <tr>
+          <td><span class="pos">Ongkos cetak {{ forloop.counter }}</span>
+            <div class="how mono">{{ row.jumlah_plat|angka }} plat &times; {{ row.tarif_cetak|rupiah }}</div>
+          </td>
+          <td class="amt">{{ row.subtotal_ongkos|rupiah }}</td>
+        </tr>
+        <tr>
+          <td><span class="pos">Druk {{ forloop.counter }}</span>
+            <div class="how mono">dasar {{ row.druk_qty|angka }} lembar &times; {{ row.jumlah_plat|angka }} plat &times; {{ hasil.tarif_druk|rupiah }}</div>
+          </td>
+          <td class="amt">{{ row.subtotal_druk|rupiah }}</td>
+        </tr>
+      {% endfor %}
+      {% for row in hasil.lipat_rows %}
+        <tr>
+          <td><span class="pos">Lipat {{ forloop.counter }}</span>
+            <div class="how mono">{{ row.jumlah_lembar|angka }} lembar &middot; lipat {{ row.lipat_faktor|angka }} &middot; {{ row.harga_lipat|rupiah }} &middot; kena {{ row.dasar|angka }} lembar</div>
+          </td>
+          <td class="amt">{{ row.subtotal|rupiah }}</td>
+        </tr>
+      {% endfor %}
+      {% if hasil.biaya_tetap_lipat %}
+        <tr>
+          <td><span class="pos">Biaya tetap lipat</span>
+            <div class="how mono">sekali per penawaran</div>
+          </td>
+          <td class="amt">{{ hasil.biaya_tetap_lipat|rupiah }}</td>
+        </tr>
+      {% endif %}
+      <tr>
+        <td><span class="pos">Potong</span>
+          <div class="how mono">{{ hasil.berat_potong|angka }} kg &times; {{ hasil.harga_potong|rupiah }}/kg</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_potong|rupiah }}</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr><td>Subtotal</td><td class="amt">{{ hasil.subtotal|rupiah }}</td></tr>
+    </tfoot>
+  </table>
+</div>

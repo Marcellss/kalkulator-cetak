@@ -1,0 +1,31 @@
+{% extends "kalkulator/base.html" %}
+{% block title %}{% if obj %}Ubah{% else %}Tambah{% endif %} Kertas{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">{% if obj %}Ubah{% else %}Tambah{% endif %} kertas</h1>
+
+<form method="post" class="card">
+  <div class="card-body">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="alert alert-danger py-2">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="row g-3">
+      {% for field in form %}
+        <div class="col-md-6">
+          {% if field.field.widget.input_type == 'checkbox' %}
+            <div class="form-check mt-4">
+              {{ field }} <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            </div>
+          {% else %}
+            <label class="form-label small" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+          {% endif %}
+          {% if field.errors %}<div class="text-danger small">{{ field.errors|join:", " }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card-footer d-flex gap-2">
+    <button type="submit" class="btn btn-primary">Simpan</button>
+    <a class="btn btn-outline-secondary" href="{% url 'kalkulator:kertas_list' %}">Batal</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,66 @@
+<div class="komponen-row border rounded p-3 mb-3" data-plat-row>
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <span class="fw-semibold small">Komponen plat</span>
+    <button type="button" class="btn btn-sm btn-outline-danger" data-hapus>Hapus</button>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">Judul Buku (opsional)</label>
+      <input class="form-control" name="judul_komponen" value="{{ row.judul_komponen }}" placeholder="Judul buku untuk komponen ini">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Unit plat</label>
+      <input class="form-control{% if row.errors.unit_plat %} is-invalid{% endif %}" name="unit_plat" value="{{ row.unit_plat }}" list="sug-unit_plat">
+      {% if row.errors.unit_plat %}<div class="text-danger small">{{ row.errors.unit_plat }}</div>{% endif %}
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Oplah</label>
+      <div class="input-group">
+        <input class="form-control num{% if row.errors.oplah %} is-invalid{% endif %}" name="oplah" type="number" min="0" step="1" value="{{ row.oplah }}">
+        <span class="input-group-text">eks</span>
+      </div>
+      {% if row.errors.oplah %}<div class="text-danger small">{{ row.errors.oplah }}</div>{% endif %}
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Jumlah plat per keteran</label>
+      <div class="input-group">
+        <input class="form-control num{% if row.errors.plat_per_set %} is-invalid{% endif %}" name="plat_per_set" type="number" min="0" step="1" value="{{ row.plat_per_set }}">
+        <span class="input-group-text">plat</span>
+      </div>
+      {% if row.errors.plat_per_set %}<div class="text-danger small">{{ row.errors.plat_per_set }}</div>{% endif %}
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Jumlah keteran</label>
+      <div class="input-group">
+        <input class="form-control num{% if row.errors.jumlah_keteran %} is-invalid{% endif %}" name="jumlah_keteran" type="number" min="0" step="1" value="{{ row.jumlah_keteran }}">
+        <span class="input-group-text">set</span>
+      </div>
+      {% if row.errors.jumlah_keteran %}<div class="text-danger small">{{ row.errors.jumlah_keteran }}</div>{% endif %}
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Plat</label>
+      <select class="form-select{% if row.errors.plat_owner %} is-invalid{% endif %}" name="plat_owner">
+        {% for value, label in plat_owner_choices %}
+          <option value="{{ value }}" {% if value == row.plat_owner %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      {% if row.errors.plat_owner %}<div class="text-danger small">{{ row.errors.plat_owner }}</div>{% endif %}
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Harga plat per plat</label>
+      <div class="input-group">
+        <input class="form-control num{% if row.errors.harga_plat %} is-invalid{% endif %}" name="harga_plat" type="number" min="0" step="any" value="{{ row.harga_plat }}">
+        <span class="input-group-text">Rp</span>
+      </div>
+      {% if row.errors.harga_plat %}<div class="text-danger small">{{ row.errors.harga_plat }}</div>{% endif %}
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Ongkos cetak per plat</label>
+      <div class="input-group">
+        <input class="form-control num{% if row.errors.tarif_cetak %} is-invalid{% endif %}" name="tarif_cetak" type="number" min="0" step="any" value="{{ row.tarif_cetak }}">
+        <span class="input-group-text">Rp</span>
+      </div>
+      {% if row.errors.tarif_cetak %}<div class="text-danger small">{{ row.errors.tarif_cetak }}</div>{% endif %}
+    </div>
+  </div>
+</div>

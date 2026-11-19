@@ -1,0 +1,91 @@
+{% load formatting %}
+<div class="table-responsive">
+  <table class="table table-pos num mb-0">
+    <thead>
+      <tr><th>Pos</th><th class="text-end">Subtotal</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="pos">Kertas isi</span>
+          <div class="how mono">{{ hasil.lembar_per_buku|angka }} lbr/buku &middot; {{ hasil.total_lembar_jadi|angka }} lbr &middot; {{ hasil.jumlah_plano|angka }} plano &middot; {{ hasil.jumlah_rim|angka }} rim &middot; {{ hasil.harga_per_rim_isi|rupiah }}/rim</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_kertas|rupiah }}</td>
+      </tr>
+      <tr>
+        <td><span class="pos">Plat isi</span>
+          <div class="how mono">{{ hasil.plat_isi_jumlah|angka }} plat &times; {{ hasil.lembar_per_buku|angka }} lbr &times; {{ hasil.tarif_plat_isi|rupiah }}</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_plat_isi|rupiah }}</td>
+      </tr>
+      <tr>
+        <td><span class="pos">Ongkos cetak isi</span>
+          <div class="how mono">{{ hasil.plat_isi_jumlah|angka }} plat &times; {{ hasil.lembar_per_buku|angka }} lbr &times; {{ hasil.tarif_cetak_isi|rupiah }}</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_cetak_isi|rupiah }}</td>
+      </tr>
+      <tr>
+        <td><span class="pos">Druk isi</span>
+          <div class="how mono">{{ hasil.druk_isi_qty|angka }} lbr &times; {{ hasil.tarif_druk_isi|rupiah }}</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_druk_isi|rupiah }}</td>
+      </tr>
+      <tr>
+        <td><span class="pos">Kertas cover</span>
+          <div class="how mono">{{ hasil.lembar_cover|angka }} lbr &middot; {{ hasil.rim_cover|angka }} rim &middot; {{ hasil.harga_per_rim_cover|rupiah }}/rim</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_kertas_cover|rupiah }}</td>
+      </tr>
+      <tr>
+        <td><span class="pos">Plat cover</span>
+          <div class="how mono">{{ hasil.plat_cover_jumlah|angka }} plat &times; {{ hasil.tarif_plat_cover|rupiah }}</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_plat_cover|rupiah }}</td>
+      </tr>
+      <tr>
+        <td><span class="pos">Ongkos cetak cover</span>
+          <div class="how mono">{{ hasil.plat_cover_jumlah|angka }} plat &times; {{ hasil.tarif_cetak_cover|rupiah }}</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_cetak_cover|rupiah }}</td>
+      </tr>
+      <tr>
+        <td><span class="pos">Druk cover</span>
+          <div class="how mono">{{ hasil.druk_cover_qty|angka }} cover &times; {{ hasil.plat_cover_jumlah|angka }} plat &times; {{ hasil.tarif_druk_cover|rupiah }}</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_druk_cover|rupiah }}</td>
+      </tr>
+      <tr>
+        <td><span class="pos">Lipat</span>
+          <div class="how mono">dasar {{ hasil.lipat_dasar|angka }} &middot; variabel {{ hasil.lipat_variabel|rupiah }} + tetap {{ hasil.lipat_biaya_tetap|rupiah }}</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_lipat|rupiah }}</td>
+      </tr>
+      <tr>
+        <td><span class="pos">Komplit</span>
+          <div class="how mono">50% dari biaya lipat</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_komplit|rupiah }}</td>
+      </tr>
+      <tr>
+        <td><span class="pos">Bending</span>
+          <div class="how mono">{{ hasil.bending_jumlah|angka }} &times; {{ hasil.bending_tebal|angka }} &times; {{ hasil.tarif_bending|rupiah }} &times; {{ hasil.jumlah_bahan|angka }}</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_bending|rupiah }}</td>
+      </tr>
+      <tr>
+        <td><span class="pos">Wrapping</span>
+          <div class="how mono">{{ hasil.wrapping_jumlah|angka }} &times; {{ hasil.bending_tebal|angka }} &times; {{ hasil.tarif_wrapping|rupiah }} &times; {{ hasil.jumlah_bahan|angka }}</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_wrapping|rupiah }}</td>
+      </tr>
+      <tr>
+        <td><span class="pos">Kirim</span>
+          <div class="how mono">input manual</div>
+        </td>
+        <td class="amt">{{ hasil.subtotal_kirim|rupiah }}</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr><td>Subtotal</td><td class="amt">{{ hasil.subtotal|rupiah }}</td></tr>
+    </tfoot>
+  </table>
+</div>

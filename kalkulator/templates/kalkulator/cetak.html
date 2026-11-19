@@ -1,0 +1,85 @@
+{% load formatting %}<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Penawaran {{ q.nomor }}</title>
+  {% include "kalkulator/_favicon.html" %}
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #111; margin: 24px; }
+    .angka { font-variant-numeric: tabular-nums; font-family: Consolas, monospace; }
+    .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #111; padding-bottom: 8px; margin-bottom: 12px; }
+    .head h1 { font-size: 18px; margin: 0; }
+    .meta { margin-bottom: 12px; line-height: 1.6; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 4px 6px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
+    th.text-end, td.text-end { text-align: right; }
+    .small { font-size: 11px; color: #555; }
+    .num { font-variant-numeric: tabular-nums; }
+    .mono { font-family: Consolas, monospace; }
+    .kicker { font-size: 11px; color: #555; }
+    .price { font-size: 24px; font-weight: bold; margin: 2px 0 6px; }
+    .price small { font-size: 13px; }
+    .price-meta { display: flex; gap: 12px; font-size: 11px; color: #555; }
+    .kv-list { margin: 12px 0; padding: 0; }
+    .kv { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-top: 1px solid #ddd; }
+    .kv dt { color: #555; }
+    .kv dd { margin: 0; font-weight: bold; }
+    .kv.strong dd { font-size: 13px; }
+    .table-pos .pos { font-weight: bold; }
+    .table-pos .how { font-size: 11px; color: #555; }
+    .table-pos .amt { text-align: right; font-weight: bold; white-space: nowrap; }
+    .summary-row { display: flex; justify-content: space-between; gap: 12px; }
+    .summary-row .angka { white-space: nowrap; }
+    .fw-semibold, tfoot { font-weight: bold; }
+    .border-top, tfoot tr { border-top: 2px solid #111; }
+    .fs-5 { font-size: 15px; }
+    .d-flex { display: flex; justify-content: space-between; }
+    .alert { border: 1px solid #999; padding: 6px; margin-bottom: 8px; }
+    hr { border: 0; border-top: 1px solid #ddd; margin: 12px 0; }
+    h2 { font-size: 13px; margin: 8px 0; }
+    .no-print { display: none; }
+    .signature { display: flex; justify-content: space-between; margin-top: 48px; }
+    .signature .pihak { width: 220px; text-align: center; display: flex; flex-direction: column; justify-content: flex-end; min-height: 90px; }
+    .signature .nama { border-top: 1px solid #111; padding-top: 4px; margin-top: 2px; }
+    .toolbar { margin-bottom: 16px; }
+    @media print { .toolbar { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="toolbar"><button onclick="window.print()">Cetak</button></div>
+  <div class="head">
+    <div>
+      <div style="display:flex;align-items:center;gap:10px">
+        {% include "kalkulator/_logo.html" %}
+        <h1>Reda Printing</h1>
+      </div>
+      <div class="small">Penawaran harga cetak</div>
+    </div>
+    <div style="text-align:right">
+      <div><strong>{{ q.nomor }}</strong></div>
+      <div class="small">{{ q.dibuat_pada|date:"d/m/Y" }}</div>
+    </div>
+  </div>
+
+  <div class="meta">
+    <div><strong>Pelanggan:</strong> {{ q.pelanggan|default:"-" }}</div>
+    <div><strong>Telepon:</strong> {{ q.telepon|default:"-" }}</div>
+    <div><strong>Judul buku:</strong> {{ q.judul_buku|default:"-" }}</div>
+    <div><strong>Ukuran / bahan:</strong> {{ q.ukuran_buku|default:"-" }} &middot; {{ q.bahan_isi|default:"-" }} / {{ q.bahan_cover|default:"-" }}</div>
+    <div><strong>Oplah:</strong> {{ q.oplah }} eksemplar</div>
+  </div>
+
+  {% include "kalkulator/_hasil.html" %}
+
+  <div class="signature">
+    <div class="pihak">
+      {% include "kalkulator/_signature.html" %}
+      <div class="nama">Celestino Reda</div>
+    </div>
+    <div class="pihak">
+      <div class="nama">{{ q.pelanggan|default:"Disetujui oleh" }}</div>
+    </div>
+  </div>
+</body>
+</html>

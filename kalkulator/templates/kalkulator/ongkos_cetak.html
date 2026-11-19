@@ -1,0 +1,79 @@
+{% load formatting %}<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Ongkos Cetak {{ q.nomor }}</title>
+  {% include "kalkulator/_favicon.html" %}
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #111; margin: 24px; }
+    .num { font-variant-numeric: tabular-nums; }
+    .mono { font-family: Consolas, monospace; }
+    .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #111; padding-bottom: 8px; margin-bottom: 12px; }
+    .head h1 { font-size: 18px; margin: 0; }
+    .small { font-size: 11px; color: #555; }
+    .meta { margin-bottom: 12px; line-height: 1.6; }
+    h2 { font-size: 13px; margin: 16px 0 8px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 4px 6px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
+    .table-pos .pos { font-weight: bold; }
+    .table-pos .how { font-size: 11px; color: #555; }
+    .table-pos .amt { text-align: right; font-weight: bold; white-space: nowrap; }
+    .kicker { font-size: 11px; color: #555; }
+    .price { font-size: 24px; font-weight: bold; margin: 2px 0 6px; }
+    .price small { font-size: 13px; }
+    .price-meta { display: flex; gap: 12px; font-size: 11px; color: #555; }
+    .kv-list { margin: 12px 0; padding: 0; }
+    .kv { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-top: 1px solid #ddd; }
+    .kv dt { color: #555; }
+    .kv dd { margin: 0; font-weight: bold; }
+    .kv.strong dd { font-size: 13px; }
+    .signature { display: flex; justify-content: space-between; margin-top: 48px; }
+    .signature .pihak { width: 220px; text-align: center; display: flex; flex-direction: column; justify-content: flex-end; min-height: 90px; }
+    .signature .nama { border-top: 1px solid #111; padding-top: 4px; margin-top: 2px; }
+    .toolbar { margin-bottom: 16px; }
+    @media print { .toolbar { display: none; } body { margin: 0; } }
+  </style>
+</head>
+<body>
+  <div class="toolbar"><button onclick="window.print()">Cetak</button></div>
+
+  <div class="head">
+    <div>
+      <div style="display:flex;align-items:center;gap:10px">
+        {% include "kalkulator/_logo.html" %}
+        <h1>Kalkulator Cetak</h1>
+      </div>
+      <div class="small">Penawaran ongkos cetak</div>
+    </div>
+    <div style="text-align:right">
+      <div><strong>{{ q.nomor }}</strong></div>
+      <div class="small">{{ q.dibuat_pada|date:"d/m/Y" }}</div>
+    </div>
+  </div>
+
+  <div class="meta">
+    <div><strong>Pelanggan:</strong> {{ q.pelanggan|default:"-" }}</div>
+    <div><strong>Telepon:</strong> {{ q.telepon|default:"-" }}</div>
+    <div><strong>Judul buku:</strong> {{ q.judul_buku|default:"-" }}</div>
+    <div><strong>Oplah:</strong> {{ q.oplah }} eksemplar</div>
+    <div><strong>Komponen plat:</strong> {{ hasil.plat_rows|length }} komponen &middot; {{ hasil.total_plat|angka }} plat</div>
+  </div>
+
+  <h2>Ringkasan</h2>
+  {% include "kalkulator/_ongkos_ringkasan.html" %}
+
+  <h2>Rincian ongkos cetak</h2>
+  {% include "kalkulator/_ongkos_rincian.html" %}
+
+  <div class="signature">
+    <div class="pihak">
+      {% include "kalkulator/_signature.html" %}
+      <div class="nama">Celestino Reda</div>
+    </div>
+    <div class="pihak">
+      <div class="nama">{{ q.pelanggan|default:"Disetujui oleh" }}</div>
+    </div>
+  </div>
+</body>
+</html>

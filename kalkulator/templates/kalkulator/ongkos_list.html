@@ -1,0 +1,59 @@
+{% extends "kalkulator/base.html" %}
+{% load formatting %}
+{% block title %}Ongkos Cetak{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="crumbs"><span class="here">Ongkos Cetak</span></div>
+    <h1 class="title">Ongkos Cetak</h1>
+    <div class="text-muted small mt-1">Penawaran cetak tanpa biaya kertas.</div>
+  </div>
+  <div class="page-actions">
+    <a class="btn-brand" href="{% url 'kalkulator:ongkos_baru' %}">Hitung Baru</a>
+  </div>
+</div>
+
+<section class="panel">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Nomor</th>
+          <th class="d-none d-md-table-cell">Tanggal</th>
+          <th>Pelanggan / judul</th>
+          <th class="text-end">Total</th>
+          <th class="text-end d-none d-lg-table-cell">Harga / unit</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for q in items %}
+          <tr>
+            <td>
+              <a href="{% url 'kalkulator:ongkos_ubah' q.pk %}">{{ q.nomor }}</a>
+              <div class="small text-muted d-md-none">{{ q.dibuat_pada|date:"d/m/Y" }}</div>
+            </td>
+            <td class="small d-none d-md-table-cell">{{ q.dibuat_pada|date:"d/m/Y H:i" }}</td>
+            <td>{{ q.pelanggan|default:"-" }}{% if q.judul_buku %}<div class="small text-muted">{{ q.judul_buku }}</div>{% endif %}</td>
+            <td class="text-end num">{{ q.total|rupiah }}</td>
+            <td class="text-end num d-none d-lg-table-cell">{{ q.harga_unit|rupiah }}</td>
+            <td class="text-end no-print">
+              <div class="d-flex flex-wrap gap-1 justify-content-end">
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'kalkulator:ongkos_ubah' q.pk %}">Ubah</a>
+                <a class="btn btn-sm btn-outline-dark" href="{% url 'kalkulator:ongkos_cetak' q.pk %}" target="_blank" rel="noopener">Cetak</a>
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'kalkulator:ongkos_cetak_cust' q.pk %}" target="_blank" rel="noopener">Cetak Untuk Cust</a>
+                <form method="post" action="{% url 'kalkulator:ongkos_hapus' q.pk %}" onsubmit="return confirm('Hapus {{ q.nomor }}?')">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger" type="submit">Hapus</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-center text-muted py-4">Belum ada penawaran ongkos cetak.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

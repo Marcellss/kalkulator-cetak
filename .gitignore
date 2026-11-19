@@ -1,0 +1,48 @@
+# scrt
+.env
+.env.*
+!.env.example
+secret.key
+*.key
+*.pem
+*.pfx
+
+# DB
+*.sqlite3
+*.db
+*.sqlite
+*.sqlite3-journal
+
+# venv
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# build
+build/
+dist/
+*.egg-info/
+staticfiles/
+
+# Log
+*.log
+logs/
+startup-error.log
+app.log
+
+.commandcode/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.bak
+*.tmp
